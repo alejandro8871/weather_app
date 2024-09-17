@@ -1,5 +1,6 @@
-package com.synaptech.weatherapp.retrofit
+package com.synaptech.weatherapp.module
 
+import com.synaptech.weatherapp.retrofit.WeatherService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,7 +12,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule {
-
 
     @Provides
     @Singleton

@@ -32,6 +32,7 @@ import com.synaptech.weatherapp.viewmodel.WeatherViewModel
 fun WeatherScreen(modifier: Modifier, viewModel: WeatherViewModel = hiltViewModel()) {
     var city by remember { mutableStateOf("") }
     val weatherData by viewModel.weatherData.observeAsState()
+    // I try to do some state in the button to have state if is press, to do not have a multi press issue later, but i didn't have many time to do it
     var isFetching by remember { mutableStateOf(false) }
 
     Column(
@@ -64,6 +65,7 @@ fun WeatherScreen(modifier: Modifier, viewModel: WeatherViewModel = hiltViewMode
 
 @Composable
 fun WeatherDataDisplay(weatherData: WeatherResponse) {
+    // with more time, I was thinking to do some lazyColumn to implemented a list with all the cities that return the first api
     Column(
         modifier = Modifier
             .fillMaxWidth()

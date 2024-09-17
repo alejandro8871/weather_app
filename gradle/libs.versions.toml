@@ -2,6 +2,7 @@
 agp = "8.6.0"
 coilCompose = "2.4.0"
 converterGson = "2.9.0"
+coreTesting = "2.2.0"
 hiltAndroid = "2.49"
 hiltcompose = "1.2.0"
 kotlin = "1.9.0"
@@ -9,15 +10,21 @@ coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxCoroutinesTest = "1.7.3"
 lifecycleRuntimeKtx = "2.8.5"
 activityCompose = "1.9.2"
 composeBom = "2024.04.01"
+mockitoCore = "4.0.0"
+mockitoInline = "3.11.2"
+mockitoKotlin = "4.0.0"
 retrofit = "2.9.0"
 runtimeLivedata = "1.7.1"
 org-jetbrains-kotlin-android = "1.8.0"
+playServicesLocation = "21.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltcompose" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
@@ -36,8 +43,13 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
