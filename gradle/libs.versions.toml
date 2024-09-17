@@ -17,6 +17,7 @@ composeBom = "2024.04.01"
 mockitoCore = "4.0.0"
 mockitoInline = "3.11.2"
 mockitoKotlin = "4.0.0"
+playServicesTasks = "18.2.0"
 retrofit = "2.9.0"
 runtimeLivedata = "1.7.1"
 org-jetbrains-kotlin-android = "1.8.0"
@@ -47,6 +48,7 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+play-services-tasks = { module = "com.google.android.gms:play-services-tasks", version.ref = "playServicesTasks" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }

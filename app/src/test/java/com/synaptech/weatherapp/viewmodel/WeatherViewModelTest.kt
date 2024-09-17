@@ -4,9 +4,11 @@ import android.location.Location
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.tasks.Tasks
 import com.synaptech.weatherapp.model.coordinate.CoordResponse
 import com.synaptech.weatherapp.model.weather.WeatherResponse
 import com.synaptech.weatherapp.repository.WeatherRepository
+import com.synaptech.weatherapp.sealed.WeatherUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -43,7 +45,7 @@ class WeatherViewModelTest {
     private lateinit var locationClient: FusedLocationProviderClient
 
     @Mock
-    private lateinit var weatherObserver: Observer<WeatherResponse>
+    private lateinit var weatherObserver: Observer<WeatherUiState>
 
     @Mock
     private lateinit var mockWeatherResponse: WeatherResponse
@@ -64,6 +66,7 @@ class WeatherViewModelTest {
     fun tearDown() {
         // Remove the test dispatcher
         Dispatchers.resetMain()
+        viewModel.weatherData.removeObserver(weatherObserver)
     }
 
     @Test
@@ -82,13 +85,13 @@ class WeatherViewModelTest {
             )
         ).thenReturn(mockWeatherResponse)
 
-        // Act
         viewModel.fetchWeatherData(city)
 
         // Assert
         verify(weatherRepository).getCoordinatesByName(city)
         verify(weatherRepository).getWeather(eq("40.7128"), eq("-74.0060"))
-        verify(weatherObserver).onChanged(mockWeatherResponse)
+        verify(weatherObserver).onChanged(WeatherUiState.Loading)
+        verify(weatherObserver).onChanged(WeatherUiState.Success(mockWeatherResponse))
     }
 
     @Test
@@ -98,29 +101,29 @@ class WeatherViewModelTest {
         `when`(mockLocation.longitude).thenReturn(-74.0060)
 
         // Mock the repository's weather response
-        whenever(
-            weatherRepository.getWeather(
-                eq("40.7128"),
-                eq("-74.0060")
-            )
-        ).thenReturn(mockWeatherResponse)
+        whenever(weatherRepository.getWeather(eq("40.7128"), eq("-74.0060"))).thenReturn(
+            mockWeatherResponse
+        )
 
-        // Act
+        // Mock FusedLocationProviderClient to return the mockLocation
+        val locationTask = Tasks.forResult(mockLocation)
+        whenever(locationClient.lastLocation).thenReturn(locationTask)
+
         viewModel.fetchWeatherByLocation()
 
         // Assert
         verify(weatherRepository).getWeather(eq("40.7128"), eq("-74.0060"))
-        verify(weatherObserver).onChanged(mockWeatherResponse)
+        verify(weatherObserver).onChanged(WeatherUiState.Loading)
+        verify(weatherObserver).onChanged(WeatherUiState.Success(mockWeatherResponse))
     }
 
     @Test
     fun fetchWeatherByLocationNotUpdate() = runTest {
-        // Arrange
-        `when`(mockLocation.latitude).thenReturn(0.0)
-        `when`(mockLocation.longitude).thenReturn(0.0)
+        // Mock FusedLocationProviderClient to return null
+        val locationTask = Tasks.forResult<Location>(null)
+        whenever(locationClient.lastLocation).thenReturn(locationTask)
 
-        // Act
-        viewModel.fetchWeatherByLocation() // Ensure fetchWeatherByLocation method is called
+        viewModel.fetchWeatherByLocation()
 
         // Assert
         verify(weatherObserver, never()).onChanged(any())

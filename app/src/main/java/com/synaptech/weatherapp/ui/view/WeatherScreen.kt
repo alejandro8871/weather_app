@@ -25,13 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.synaptech.weatherapp.model.weather.WeatherResponse
+import com.synaptech.weatherapp.sealed.WeatherUiState
 import com.synaptech.weatherapp.util.convertKelvinToF
 import com.synaptech.weatherapp.viewmodel.WeatherViewModel
 
 @Composable
 fun WeatherScreen(modifier: Modifier, viewModel: WeatherViewModel = hiltViewModel()) {
     var city by remember { mutableStateOf("") }
-    val weatherData by viewModel.weatherData.observeAsState()
+    val weatherUiState by viewModel.weatherData.observeAsState()
     // I try to do some state in the button to have state if is press, to do not have a multi press issue later, but i didn't have many time to do it
     var isFetching by remember { mutableStateOf(false) }
 
@@ -56,9 +57,22 @@ fun WeatherScreen(modifier: Modifier, viewModel: WeatherViewModel = hiltViewMode
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        weatherData?.let {
-            // Display weather data if available
-            WeatherDataDisplay(weatherData = it)
+        when (weatherUiState) {
+            is WeatherUiState.Success -> {
+                WeatherDataDisplay(weatherData = (weatherUiState as WeatherUiState.Success).weather)
+            }
+
+            is WeatherUiState.Loading -> {
+                // Show a loading indicator
+                Text("Loading...")
+            }
+
+            is WeatherUiState.Error -> {
+                // Show an error message
+                Text("Error: ${(weatherUiState as WeatherUiState.Error).exception.message}")
+            }
+
+            else -> {} // Handle initial state or null
         }
     }
 }

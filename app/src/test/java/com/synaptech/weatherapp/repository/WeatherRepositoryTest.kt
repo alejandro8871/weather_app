@@ -36,12 +36,10 @@ class WeatherRepositoryTest {
         val lat = "40.7128"
         val lon = "-74.0060"
 
-
         // Mock weatherService response
         whenever(weatherService.getWeather(lat, lon, "e748beade60d9b49a46657debaf81e03"))
             .thenReturn(weatherResponse)
 
-        // Act
         val result = weatherRepository.getWeather(lat, lon)
 
         // Assert
@@ -58,7 +56,6 @@ class WeatherRepositoryTest {
         whenever(weatherService.getCoordinatesByName(city, 1, "e748beade60d9b49a46657debaf81e03"))
             .thenReturn(mockCoordinatesResponse)
 
-        // Act
         val result = weatherRepository.getCoordinatesByName(city)
 
         // Assert
