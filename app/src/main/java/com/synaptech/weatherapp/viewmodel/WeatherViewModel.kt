@@ -1,11 +1,15 @@
 package com.synaptech.weatherapp.viewmodel
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Application
+import android.content.pm.PackageManager
 import android.location.Location
-import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.synaptech.weatherapp.repository.WeatherRepository
@@ -18,29 +22,49 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
-    private val locationClient: FusedLocationProviderClient // Inject location client
-) : ViewModel() {
-    private val TAG: String = "WeatherViewModel"
+    private val locationClient: FusedLocationProviderClient, // Inject location client
+    application: Application
+) : AndroidViewModel(application) {
+
     private val _weatherData = MutableLiveData<WeatherUiState>()
     val weatherData: LiveData<WeatherUiState> = _weatherData
+
+    private val _permissionGranted = MutableLiveData<Boolean>()
+    val permissionGranted: LiveData<Boolean> = _permissionGranted
 
     fun fetchWeatherData(city: String) {
         viewModelScope.launch {
             try {
-                // I like to add all the city that the getCoordinatesByName can fetch if i have time, is possible to do some list with all the cities
                 _weatherData.value = WeatherUiState.Loading
                 val coordinates = weatherRepository.getCoordinatesByName(city)
-                Log.e(TAG, coordinates[0].toString())
                 SharedPreferencesManager.saveString("city", city)
-                val weather = weatherRepository.getWeather(
-                    coordinates[0].lat.toString(),
-                    coordinates[0].lon.toString()
-                )
-                _weatherData.value = WeatherUiState.Success(weather)
+                if (coordinates.isNotEmpty()) {
+                    val weather = weatherRepository.getWeather(
+                        coordinates[0].lat.toString(),
+                        coordinates[0].lon.toString()
+                    )
 
+                    // Ensure weather is not null
+                    _weatherData.value = weather?.let {
+                        WeatherUiState.Success(it)
+                    } ?: WeatherUiState.Error(NullPointerException("Weather data is null"))
+                } else {
+                    _weatherData.value =
+                        WeatherUiState.Error(IllegalArgumentException("Invalid coordinates"))
+                }
             } catch (e: Exception) {
                 _weatherData.value = WeatherUiState.Error(e)
-                Log.e(TAG, e.printStackTrace().toString())
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun fetchWeatherByLocation() {
+        locationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            location?.let {
+                fetchWeatherByLocation(it)
+            } ?: run {
+                _weatherData.value = WeatherUiState.Error(NullPointerException("Location is null"))
             }
         }
     }
@@ -53,21 +77,37 @@ class WeatherViewModel @Inject constructor(
                     location?.latitude.toString(),
                     location?.longitude.toString()
                 )
-                _weatherData.value = WeatherUiState.Success(weather)
+
+                _weatherData.value = weather.let {
+                    WeatherUiState.Success(it)
+                }
             } catch (e: Exception) {
                 _weatherData.value = WeatherUiState.Error(e)
-                Log.e(TAG, e.printStackTrace().toString())
             }
         }
     }
 
+    // Check if location permission is granted
+    fun checkLocationPermission() {
+        val context = getApplication<Application>()
+        _permissionGranted.value = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
-    @SuppressLint("MissingPermission")
-    fun fetchWeatherByLocation() {
-        // Fetch location and weather data
-        locationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            location?.let {
-                fetchWeatherByLocation(location)
+    // Request permission through activity
+    fun requestLocationPermission(locationPermissionLauncher: ActivityResultLauncher<Array<String>>) {
+        locationPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    }
+
+    // Fetch weather by location if permission is granted
+    fun fetchWeatherIfPermissionGranted() {
+        if (_permissionGranted.value == true) {
+            fetchWeatherByLocation()
+        } else {
+            val savedCity = SharedPreferencesManager.getString("city", "")
+            if (savedCity.isNotEmpty()) {
+                fetchWeatherData(savedCity)
             }
         }
     }

@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(private val weatherService: WeatherService) {
 
-    private val API_KEY = "e748beade60d9b49a46657debaf81e03"
+    val API_KEY = "e748beade60d9b49a46657debaf81e03"
 
     suspend fun getWeather(lat: String, lon: String): WeatherResponse {
         return weatherService.getWeather(lat, lon, API_KEY)
